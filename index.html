@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User@Root:~</title>
+    <style>
+        /* RESET & BASIC SETUP */
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            background-color: #0a0a0a; /* Deep Black */
+            color: #00ff41; /* Classic Hacker Green */
+            font-family: 'Courier New', Courier, monospace;
+            overflow: hidden;
+            font-size: 16px;
+        }
+
+        /* SCANLINE EFFECT (For style) */
+        body::before {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 2;
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+        }
+
+        /* CONTAINER */
+        #terminal {
+            padding: 20px;
+            height: 100%;
+            box-sizing: border-box;
+            overflow-y: auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* TYPOGRAPHY & LAYOUT */
+        p { margin: 5px 0; line-height: 1.5; }
+        .command-line { display: flex; align-items: center; margin-top: 10px; }
+        .prompt { color: #d33682; /* Magenta for user */ font-weight: bold; margin-right: 10px; }
+        .path { color: #2aa198; /* Cyan for path */ }
+        
+        /* INPUT FIELD STYLING */
+        input {
+            background: transparent;
+            border: none;
+            color: #00ff41;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 16px;
+            flex-grow: 1;
+            outline: none;
+            caret-color: #00ff41;
+        }
+
+        /* UTILITIES */
+        .hidden { display: none; }
+        .ascii-art { white-space: pre; color: #2aa198; font-weight: bold; margin-bottom: 20px; }
+        .highlight { color: #b58900; font-weight: bold; } /* Yellow for emphasis */
+        .error { color: #dc322f; } /* Red for errors */
+        
+        /* RESPONSIVE */
+        @media (max-width: 600px) {
+            .ascii-art { font-size: 10px; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="terminal">
+    <div class="ascii-art">
+  _    _          _____ _  ________ _____  
+ | |  | |   /\   / ____| |/ /  ____|  __ \ 
+ | |__| |  /  \ | |    | ' /| |__  | |__) |
+ |  __  | / /\ \| |    |  < |  __| |  _  / 
+ | |  | |/ ____ \ |____| . \| |____| | \ \ 
+ |_|  |_/_/    \_\_____|_|\_\______|_|  \_\
+ v1.0.4 [Stable] - System Integrity: 98%
+    </div>
+    
+    <div id="output">
+        <p>Initializing handshake...</p>
+        <p>Connection established. Welcome to the mainframe.</p>
+        <p>Type <span class="highlight">'help'</span> to view available commands.</p>
+        <br>
+    </div>
+
+    <div class="command-line">
+        <span class="prompt">guest@portfolio:<span class="path">~</span>$</span>
+        <input type="text" id="input" autofocus autocomplete="off">
+    </div>
+</div>
+
+<script>
+    const input = document.getElementById('input');
+    const output = document.getElementById('output');
+    const terminal = document.getElementById('terminal');
+
+    // Focus input when clicking anywhere
+    document.addEventListener('click', () => input.focus());
+
+    input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            const command = input.value.trim().toLowerCase();
+            handleCommand(command);
+            input.value = '';
+            // Scroll to bottom
+            setTimeout(() => terminal.scrollTop = terminal.scrollHeight, 10);
+        }
+    });
+
+    function print(text, type = '') {
+        const p = document.createElement('div');
+        p.innerHTML = text;
+        if (type) p.classList.add(type);
+        output.appendChild(p);
+    }
+
+    function handleCommand(cmd) {
+        // Print the user's command to history
+        print(`<span class="prompt">guest@portfolio:<span class="path">~</span>$</span> ${cmd}`);
+
+        switch (cmd) {
+            case 'help':
+                print(`<br>Available binaries:`);
+                print(`<span class="highlight">whoami</span>     - Display user profile info`);
+                print(`<span class="highlight">ls -la</span>     - List skills and technologies`);
+                print(`<span class="highlight">cat proj</span>   - Concatenate projects.txt`);
+                print(`<span class="highlight">ping</span>       - Test connectivity (Contact me)`);
+                print(`<span class="highlight">sudo</span>       - Execute a command as another user`);
+                print(`<span class="highlight">clear</span>      - Clear terminal screen`);
+                print(`<br>`);
+                break;
+
+            case 'whoami':
+                print(`<br> > <span class="highlight">USER IDENTIFIED:</span> White Hat / Bug Hunter`);
+                print(` > <span class="highlight">STATUS:</span> Caffeinated`);
+                print(` > <span class="highlight">BIO:</span> I turn coffee into code and vulnerabilities into CVEs. I specialize in breaking things just to see how they work, then fixing them so nobody else can. Currently looking for a system to secure (or a server to crash).`);
+                print(`<br>`);
+                break;
+
+            case 'ls':
+            case 'ls -la':
+            case 'skills':
+                print(`<br>drwx------  5 root root  4096 Dec 16 .`);
+                print(`drwxr-xr-x 22 root root  4096 Dec 16 ..`);
+                print(`-rwxr-xr-x  1 user user   512 Dec 16 <span class="highlight">Python_Scripting.py</span>`);
+                print(`-rwxr-xr-x  1 user user   256 Dec 16 <span class="highlight">Penetration_Testing.sh</span>`);
+                print(`-rw-r--r--  1 user user   128 Dec 16 <span class="highlight">Network_Analysis.pcap</span>`);
+                print(`-rw-r--r--  1 user user   128 Dec 16 <span class="highlight">Linux_Administration.conf</span>`);
+                print(`-rw-r--r--  1 user user    64 Dec 16 <span class="highlight">Social_Engineering.txt</span>`);
+                print(`<br>`);
+                break;
+
+            case 'cat proj':
+            case 'projects':
+                print(`<br>Loading modules...`);
+                print(`1. <span class="highlight">[Wifi_Deauth_Tool]</span> - A Python script that politely asks devices to leave the network. (Educational use only, obviously).`);
+                print(`2. <span class="highlight">[Secure_Chat_App]</span> - E2E encrypted chat. Even the NSA can't read your "u up?" texts.`);
+                print(`3. <span class="highlight">[Firewall_Evasion]</span> - Research paper on packet fragmentation techniques.`);
+                print(`<br>`);
+                break;
+
+            case 'ping':
+            case 'contact':
+                print(`<br>Pinging user...`);
+                print(`64 bytes from user: icmp_seq=1 ttl=64 time=0.034 ms`);
+                print(`--- user ping statistics ---`);
+                print(`Connect via Email: <a href="mailto:hacker@example.com" style="color:#fff">hacker@example.com</a>`);
+                print(`Connect via GitHub: <a href="#" style="color:#fff">github.com/yourhandle</a>`);
+                print(`<br>`);
+                break;
+            
+            case 'sudo':
+            case 'sudo su':
+                print(`<br>guest is not in the sudoers file. This incident will be reported. Nice try though.`);
+                print(`<br>`);
+                break;
+
+            case 'clear':
+                output.innerHTML = '';
+                break;
+            
+            case '':
+                break;
+
+            default:
+                print(`bash: ${cmd}: command not found. Type 'help' to see what works.`);
+        }
+    }
+</script>
+
+</body>
+</html>
