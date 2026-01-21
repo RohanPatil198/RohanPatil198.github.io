@@ -1,185 +1,373 @@
+Here is the complete, single-file solution. I have integrated your specific **Modern GUI code** (exactly as you provided) into the **Bootloader System**.
+
+### How it works:
+
+1. **Boot Screen:** You get the BIOS screen first.
+2. **CLI Mode:** If selected, you get the terminal where the user is `rohan@root`.
+3. **GUI Mode:** If selected, it loads the **exact modern design** you provided (including the "Enter World" gate, particles, and specific sections).
+
+Save this code as `index.html`.
+
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>rohan_patil@cryptorix:~</title>
+    <title>Rohan Patil | System Interface</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime&display=swap" rel="stylesheet">
+
     <style>
-        /* RESET & BASIC SETUP */
-        body, html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            background-color: #0a0a0a;
+        /* --- SYSTEM CORE --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body, html { height: 100%; width: 100%; overflow: hidden; background: #000; }
+        
+        /* Utility to manage views */
+        .system-section {
+            position: fixed; inset: 0; height: 100vh; width: 100vw;
+            overflow: hidden; z-index: 1; display: none;
+        }
+        .active-section { display: block; }
+        
+        /* --- 1. BOOT SCREEN (BIOS STYLE) --- */
+        #boot-layer {
+            background-color: #000;
             color: #00ff41;
-            font-family: 'Courier New', Courier, monospace;
-            overflow: hidden;
-            font-size: 16px;
+            font-family: 'Courier Prime', monospace;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; z-index: 10000;
         }
-
-        /* SCANLINE EFFECT */
-        body::before {
-            content: " ";
-            display: block;
-            position: absolute;
-            top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-            z-index: 2;
-            background-size: 100% 2px, 3px 100%;
-            pointer-events: none;
+        .bios-text { font-size: 14px; opacity: 0.7; margin-bottom: 40px; line-height: 1.5; }
+        .boot-title { font-size: 2.5rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; color: #00ff41; font-weight: bold; }
+        .boot-subtitle { font-size: 1rem; margin-bottom: 40px; color: #00ff41; opacity: 0.8; }
+        .boot-options { display: flex; gap: 30px; }
+        .boot-btn {
+            background: transparent; border: 2px solid #00ff41; color: #00ff41;
+            padding: 15px 30px; font-family: 'JetBrains Mono', monospace; font-size: 1.2rem;
+            cursor: pointer; transition: 0.3s; text-transform: uppercase;
         }
+        .boot-btn:hover { background: #00ff41; color: #000; box-shadow: 0 0 20px #00ff41; }
 
-        #terminal {
-            padding: 20px;
-            height: 100%;
-            box-sizing: border-box;
-            overflow-y: auto;
-            position: relative;
-            z-index: 1;
+        /* --- 2. CLI LAYER (TERMINAL) --- */
+        #cli-layer {
+            background-color: #0a0a0a; color: #00ff41;
+            font-family: 'Courier Prime', monospace; padding: 20px; overflow-y: auto;
         }
-
-        p { margin: 5px 0; line-height: 1.5; }
-        .command-line { display: flex; align-items: center; margin-top: 10px; }
+        .term-line { margin: 5px 0; line-height: 1.5; font-size: 16px; }
+        .term-input-area { display: flex; align-items: center; margin-top: 10px; }
         .prompt { color: #d33682; font-weight: bold; margin-right: 10px; }
         .path { color: #2aa198; }
-        
-        input {
-            background: transparent;
-            border: none;
-            color: #00ff41;
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 16px;
-            flex-grow: 1;
-            outline: none;
-            caret-color: #00ff41;
+        #term-input {
+            background: transparent; border: none; color: #00ff41;
+            font-family: 'Courier Prime', monospace; font-size: 16px; flex-grow: 1; outline: none; caret-color: #00ff41;
         }
 
-        .ascii-art { white-space: pre; color: #2aa198; font-weight: bold; margin-bottom: 20px; }
-        .highlight { color: #b58900; font-weight: bold; }
-        .info { color: #268bd2; }
-        .error { color: #dc322f; }
+        /* --- 3. GUI LAYER (YOUR DESIGN) --- */
+        /* Note: I scoped these styles to #gui-layer where possible to avoid conflicts */
+        #gui-layer {
+            font-family: Inter, sans-serif;
+            background: radial-gradient(1000px 600px at 10% -10%, #0b1024, transparent), #05070f;
+            color: #e5e7eb; overflow-y: auto; overflow-x: hidden;
+            --bg:#05070f; --accent:#22d3ee; --accent2:#a78bfa;
+            --text:#e5e7eb; --muted:#9ca3af;
+            --glass:rgba(255,255,255,.07); --border:rgba(255,255,255,.12);
+        }
+
+        /* Your Provided CSS */
+        #gui-layer canvas { position:fixed; inset:0; z-index:-1; pointer-events: none; }
         
-        @media (max-width: 600px) {
-            .ascii-art { font-size: 8px; }
+        #gate {
+            position:fixed; inset:0; z-index:9999;
+            background:radial-gradient(circle at center,#0b1024,#05070f);
+            display:flex; align-items:center; justify-content:center; flex-direction:column;
+            transition:opacity 1.2s ease, visibility 1.2s ease
+        }
+        #gate.hidden { opacity:0; visibility:hidden; }
+
+        .gate-btn {
+            margin-top:30px; padding:18px 40px; font-size:1rem; font-weight:700;
+            border-radius:16px; border:none; cursor:pointer; color: #fff;
+            background:linear-gradient(135deg,#22d3ee,#a78bfa);
+            box-shadow:0 0 40px rgba(34,211,238,.4)
+        }
+
+        /* GUI Header */
+        header { position:fixed; top:0; width:100%; z-index:100; backdrop-filter:blur(18px); background:rgba(5,7,15,.6); border-bottom:1px solid rgba(255,255,255,.12); }
+        nav { max-width:1200px; margin:auto; padding:18px 24px; display:flex; justify-content:space-between; align-items:center; }
+        .logo { font-weight:900; background:linear-gradient(90deg,#22d3ee,#a78bfa); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+        nav ul { list-style:none; display:flex; gap:26px; }
+        nav a { color:#9ca3af; transition:.3s; text-decoration: none; }
+        nav a:hover { color:#e5e7eb; }
+
+        /* GUI Content */
+        section { max-width:1200px; margin:auto; padding:120px 24px; }
+        .hero { min-height:100vh; display:grid; grid-template-columns:1.2fr .8fr; align-items:center; gap:50px; }
+        .badge { display:inline-block; padding:8px 16px; border-radius:999px; background:rgba(34,211,238,.15); color:#22d3ee; font-size:.8rem; margin-bottom:20px; }
+        .gui-h1 { font-size:3.6rem; font-weight:900; line-height:1.05; margin:0; }
+        .hero p { margin-top:20px; color:#9ca3af; }
+        
+        .typing { font-family:"JetBrains Mono",monospace; color:#22d3ee; margin-top:20px; height:26px; }
+
+        .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:30px; }
+        .card { background:linear-gradient(180deg,rgba(255,255,255,.1),rgba(255,255,255,0)); border:1px solid rgba(255,255,255,.12); border-radius:22px; padding:32px; transition:.4s; position:relative; }
+        .card:hover { transform:translateY(-10px) scale(1.02); }
+        .card h3 { color:#22d3ee; margin-bottom:12px; }
+        .card p { color:#9ca3af; }
+
+        footer { text-align:center; padding:40px 24px; color:#9ca3af; border-top:1px solid rgba(255,255,255,.12); }
+        
+        /* Custom Cursor for GUI */
+        .cursor { position:fixed; width:26px; height:26px; border-radius:50%; pointer-events:none; background:radial-gradient(circle,#22d3ee,transparent 70%); mix-blend-mode:screen; z-index:9999; transition: transform 0.1s; }
+
+        @media(max-width:900px){ .hero{grid-template-columns:1fr} .gui-h1{font-size:2.6rem} }
+
+        /* REBOOT BUTTON (Global) */
+        #reboot-btn {
+            position: fixed; bottom: 20px; right: 20px; z-index: 100000;
+            background: rgba(0,0,0,0.6); border: 1px solid #333; color: #fff;
+            padding: 8px 12px; font-size: 10px; cursor: pointer;
         }
     </style>
 </head>
 <body>
 
-<div id="terminal">
-    <div class="ascii-art">
-  _____  ____  _    _          _   _ 
- |  __ \|  _ \| |  | |   /\   | \ | |
- | |__) | | | | |__| |  /  \  |  \| |
- |  _  /| | | |  __  | / /\ \ | . ` |
- | | \ \| |__| |  | |/ ____ \| |\  |
- |_|  \_\____/|_|  |_/_/    \_\_| \_|
- -------------------------------------
- Rohan Patil | DevOps | Security Analyst
- System Admin | PG-DITISS (CDAC)
- -------------------------------------
-    </div>
-    
-    <div id="output">
-        <p>Authentication bypass... <span class="highlight">[SUCCESS]</span></p>
-        <p>Welcome, Operator. System ready for input.</p>
-        <p>Type <span class="highlight">'help'</span> to view available commands.</p>
-        <br>
+    <div id="boot-layer" class="system-section active-section">
+        <div class="bios-text">
+            BIOS DATE 01/21/26 11:22:33 VER 1.0.4<br>
+            CPU: QUANTUM CORE i9 - 128 CORES DETECTED<br>
+            RAM: 64TB OK<br>
+        </div>
+        <div class="boot-title">SELECT INTERFACE MODE</div>
+        <div class="boot-subtitle">Choose how you want to view the system.</div>
+        <div class="boot-options">
+            <button class="boot-btn" onclick="startSystem('CLI')">[ CLI_MODE ]</button>
+            <button class="boot-btn" onclick="startSystem('GUI')">[ GUI_MODE ]</button>
+        </div>
     </div>
 
-    <div class="command-line">
-        <span class="prompt">guest@cryptorix:<span class="path">~</span>$</span>
-        <input type="text" id="input" autofocus autocomplete="off">
+    <div id="cli-layer" class="system-section">
+        <div class="term-line" style="white-space: pre; color: #2aa198; font-weight: bold; font-size: 10px; margin-bottom: 20px;">
+  _____       _                 
+ |  __ \     | |                
+ | |__) |___ | |__   __ _ _ __  
+ |  _  // _ \| '_ \ / _` | '_ \ 
+ | | \ \ (_) | | | | (_| | | | |
+ |_|  \_\___/|_| |_|\__,_|_| |_|
+        </div>
+        <div id="term-output">
+            <div class="term-line">System initialized.</div>
+            <div class="term-line">Logged in as: <span style="color:#fff">Rohan Patil</span></div>
+            <div class="term-line">Type <span style="color:#b58900">'help'</span> to see available commands.</div>
+        </div>
+        <div class="term-input-area">
+            <span class="prompt">rohan@root:<span class="path">~</span>$</span>
+            <input type="text" id="term-input" autocomplete="off" spellcheck="false">
+        </div>
     </div>
-</div>
 
-<script>
-    const input = document.getElementById('input');
-    const output = document.getElementById('output');
-    const terminal = document.getElementById('terminal');
+    <div id="gui-layer" class="system-section">
+        <canvas id="bg"></canvas>
+        <div class="cursor" id="cursor"></div>
 
-    document.addEventListener('click', () => input.focus());
+        <div id="gate">
+            <h1 class="gui-h1">Welcome to My Cyber World</h1>
+            <p style="color:var(--muted);margin-top:12px">Explore systems, security & defense</p>
+            <button class="gate-btn" onclick="document.getElementById('gate').classList.add('hidden')">Enter My World</button>
+        </div>
 
-    input.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') {
-            const command = input.value.trim().toLowerCase();
-            handleCommand(command);
-            input.value = '';
-            setTimeout(() => terminal.scrollTop = terminal.scrollHeight, 10);
+        <header>
+            <nav>
+                <div class="logo">Rohan Patil</div>
+                <ul>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#skills">Skills</a></li>
+                    <li><a href="#projects">Labs</a></li>
+                    <li><a href="#education">Education</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <section class="hero" id="about">
+            <div>
+                <div class="badge">CYBERSECURITY • INFRASTRUCTURE • DEFENSE</div>
+                <h1 class="gui-h1">Secure. Detect. Defend.</h1>
+                <p>Computer Science professional with a diploma in IT Infrastructure & System Security. I design, break, defend and audit systems.</p>
+                <div class="typing" id="typing"></div>
+            </div>
+            <div class="card">
+                <h3>My Core Domains</h3>
+                <p>Networking • System Administration • Cybersecurity • Ethical Hacking • Forensics • Compliance • PKI</p>
+            </div>
+        </section>
+
+        <section id="skills">
+            <h2>Skills Universe</h2>
+            <div class="grid">
+                <div class="card"><h3>Networking</h3><p>Firewalls, routing, switching, IDS/IPS</p></div>
+                <div class="card"><h3>System Administration</h3><p>Linux & Windows, hardening, monitoring</p></div>
+                <div class="card"><h3>Cybersecurity</h3><p>Threat modeling, vulnerability assessment</p></div>
+                <div class="card"><h3>Ethical Hacking</h3><p>Recon, exploitation, remediation</p></div>
+            </div>
+        </section>
+
+        <section id="projects">
+            <h2>Hands-on Labs</h2>
+            <div class="grid">
+                <div class="card"><h3>Firewall Hardening</h3><p>iptables rules, logging, attack mitigation</p></div>
+                <div class="card"><h3>PKI Lab</h3><p>Certificate authority, SSL/TLS trust chain</p></div>
+                <div class="card"><h3>Forensics Case</h3><p>Disk imaging, log analysis, incident report</p></div>
+            </div>
+        </section>
+
+        <section id="education">
+            <h2>Education</h2>
+            <div class="grid">
+                <div class="card"><h3>Computer Science</h3><p>OS, Networking, Security fundamentals</p></div>
+                <div class="card"><h3>Diploma in IT Infrastructure & System Security</h3><p>Security-first engineering mindset</p></div>
+            </div>
+        </section>
+
+        <section id="contact">
+            <h2>Connect</h2>
+            <div class="grid">
+                <div class="card"><h3>Email</h3><p>your.email@example.com</p></div>
+                <div class="card"><h3>LinkedIn</h3><p>linkedin.com/in/yourprofile</p></div>
+                <div class="card"><h3>GitHub</h3><p>github.com/yourusername</p></div>
+            </div>
+        </section>
+
+        <footer>© 2026 Rohan Patil — Security is a mindset</footer>
+    </div>
+
+    <button id="reboot-btn" onclick="location.reload()">↺ REBOOT</button>
+
+    <script>
+        /* --- SYSTEM CONTROL --- */
+        function startSystem(mode) {
+            document.getElementById('boot-layer').style.display = 'none';
+            
+            if (mode === 'CLI') {
+                document.getElementById('cli-layer').style.display = 'block';
+                document.getElementById('term-input').focus();
+            } else {
+                document.getElementById('gui-layer').style.display = 'block';
+                initGuiEffects();
+            }
         }
-    });
 
-    function print(text, type = '') {
-        const p = document.createElement('div');
-        p.innerHTML = text;
-        if (type) p.classList.add(type);
-        output.appendChild(p);
-    }
+        /* --- CLI LOGIC --- */
+        const termInput = document.getElementById('term-input');
+        const termOutput = document.getElementById('term-output');
 
-    function handleCommand(cmd) {
-        print(`<span class="prompt">guest@cryptorix:<span class="path">~</span>$</span> ${cmd}`);
+        document.getElementById('cli-layer').addEventListener('click', () => termInput.focus());
 
-        switch (cmd) {
-            case 'help':
-                print(`<br>Available binaries:`);
-                print(`<span class="highlight">whoami</span>     - About Rohan Patil`);
-                print(`<span class="highlight">edu</span>        - Academic background`);
-                print(`<span class="highlight">skills</span>     - Tech stack & toolkit`);
-                print(`<span class="highlight">exp</span>        - Operational experience`);
-                print(`<span class="highlight">contact</span>    - Establish a secure link`);
-                print(`<span class="highlight">clear</span>      - Flush terminal buffer`);
-                print(`<br>`);
-                break;
+        termInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                const cmd = termInput.value.trim().toLowerCase();
+                const newLine = document.createElement('div');
+                newLine.className = 'term-line';
+                newLine.innerHTML = `<span class="prompt">rohan@root:<span class="path">~</span>$</span> ${cmd}`;
+                termOutput.appendChild(newLine);
+                
+                handleCommand(cmd);
+                termInput.value = '';
+                document.getElementById('cli-layer').scrollTop = document.getElementById('cli-layer').scrollHeight;
+            }
+        });
 
-            case 'whoami':
-                print(`<br><span class="highlight">NAME:</span> Rohan Patil`);
-                print(`<span class="highlight">ROLE:</span> DevOps Engineer & Security Enthusiast`);
-                print(`<span class="highlight">MISSION:</span> Building unhackable infrastructure and automating the world.`);
-                print(`<span class="highlight">BIO:</span> Currently mastering the depths of IT Infrastructure at CDAC. I bridge the gap between development and operations with a security-first mindset.`);
-                print(`<br>`);
-                break;
-
-            case 'edu':
-                print(`<br><span class="info">[+] PG Diploma in IT Infrastructure, Systems & Security (PG-DITISS)</span>`);
-                print(`    Sunbeam Institute of Information Technology (CDAC) | Aug 2025 - Feb 2026`);
-                print(`<br><span class="info">[+] B.Tech in Computer Science & Engineering</span>`);
-                print(`    Graduated June 2024`);
-                print(`<br>`);
-                break;
-
-            case 'skills':
-                print(`<br><span class="highlight">OS:</span> Linux (Ubuntu, RHEL, Kali), Windows Server`);
-                print(`<span class="highlight">SECURITY:</span> Pentesting, Wireshark, Nmap, Metasploit`);
-                print(`<span class="highlight">DEVOPS:</span> Docker, Git, CI/CD pipelines, Bash Scripting`);
-                print(`<span class="highlight">NETWORKING:</span> TCP/IP, DNS, VPNs, Firewall Configuration`);
-                print(`<br>`);
-                break;
-
-            case 'exp':
-                print(`<br><span class="error">[!] NO INDUSTRY EXPERIENCE DETECTED... INJECTING LAB DATA</span>`);
-                print(`- <span class="highlight">Virtual Lab:</span> Built a localized DMZ with pfSense firewalls.`);
-                print(`- <span class="highlight">Automation:</span> Developed custom Python scripts for automated network scanning.`);
-                print(`- <span class="highlight">Hardening:</span> Hardened Linux kernels against common CVE exploits.`);
-                print(`- <span class="highlight">Monitoring:</span> Currently deploying ELK stack for real-time log analysis.`);
-                print(`<br>`);
-                break;
-
-            case 'contact':
-                print(`<br>Fetching contact protocols...`);
-                print(`Email:  <a href="mailto:your.email@example.com" style="color:#fff">rohan@cryptorix.com</a>`);
-                print(`GitHub: <a href="https://github.com/yourhandle" target="_blank" style="color:#fff">github.com/yourhandle</a>`);
-                print(`<br>`);
-                break;
-
-            case 'clear':
-                output.innerHTML = '';
-                break;
-
-            default:
-                print(`bash: ${cmd}: command not found. Type 'help'.`);
+        function print(text) {
+            const el = document.createElement('div');
+            el.className = 'term-line';
+            el.innerHTML = text;
+            termOutput.appendChild(el);
         }
-    }
-</script>
 
+        function handleCommand(cmd) {
+            switch(cmd) {
+                case 'help':
+                    print("AVAILABLE COMMANDS:");
+                    print("- <span style='color:#b58900'>whoami</span>");
+                    print("- <span style='color:#b58900'>ls</span> (view skills)");
+                    print("- <span style='color:#b58900'>gui</span> (switch mode)");
+                    print("- <span style='color:#b58900'>clear</span>");
+                    break;
+                case 'whoami':
+                    print("Rohan Patil - Cybersecurity Professional");
+                    print("Mission: Secure. Detect. Defend.");
+                    break;
+                case 'ls':
+                    print("drwx------ Networking");
+                    print("drwx------ System_Admin");
+                    print("-rwx------ Ethical_Hacking.sh");
+                    break;
+                case 'gui':
+                    startSystem('GUI');
+                    break;
+                case 'clear':
+                    termOutput.innerHTML = '';
+                    break;
+                default:
+                    print(`bash: ${cmd}: command not found`);
+            }
+        }
+
+        /* --- GUI LOGIC (Your Provided Scripts) --- */
+        function initGuiEffects() {
+            // Cursor
+            const cursor = document.getElementById('cursor');
+            window.addEventListener('mousemove', e => {
+                cursor.style.left = e.clientX + 'px';
+                cursor.style.top = e.clientY + 'px';
+            });
+
+            // Typing
+            const lines = ['> Initializing SOC...','> Scanning perimeter...','> Validating PKI...','> Systems secured'];
+            let i=0, j=0, el=document.getElementById('typing');
+            
+            // Avoid double interval if called twice
+            if(window.typeInterval) clearInterval(window.typeInterval);
+            
+            window.typeInterval = setInterval(() => {
+                if (j < lines[i].length) {
+                    el.textContent += lines[i][j++];
+                } else {
+                    setTimeout(() => {
+                        el.textContent = '';
+                        j = 0;
+                        i = (i + 1) % lines.length;
+                    }, 1000)
+                }
+            }, 80);
+
+            // Particles
+            const c = document.getElementById('bg'), ctx = c.getContext('2d');
+            let w, h;
+            function resize() { w = c.width = window.innerWidth; h = c.height = window.innerHeight; }
+            resize();
+            window.addEventListener('resize', resize);
+            
+            const pts = Array.from({length:80}, () => ({
+                x: Math.random() * w, y: Math.random() * h,
+                vx: (Math.random() - .5) * .4, vy: (Math.random() - .5) * .4
+            }));
+            
+            function anim() {
+                ctx.clearRect(0, 0, w, h);
+                pts.forEach(p => {
+                    p.x += p.vx; p.y += p.vy;
+                    if(p.x < 0 || p.x > w) p.vx *= -1;
+                    if(p.y < 0 || p.y > h) p.vy *= -1;
+                    ctx.fillStyle = 'rgba(34,211,238,.6)';
+                    ctx.fillRect(p.x, p.y, 2, 2);
+                });
+                if(document.getElementById('gui-layer').style.display === 'block') requestAnimationFrame(anim);
+            }
+            anim();
+        }
+    </script>
 </body>
 </html>
+
+```
