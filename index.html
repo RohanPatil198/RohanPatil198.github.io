@@ -8,275 +8,353 @@
     <link href="https://fonts.googleapis.com/css2?family=Courier+Prime&display=swap" rel="stylesheet">
 
     <style>
+        /* --- SYSTEM CORE --- */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body, html { height: 100%; width: 100%; overflow: hidden; background: #000; }
-
+        
+        /* Utility to manage views */
         .system-section {
-            position: fixed; inset: 0;
-            display: none;
+            position: fixed; inset: 0; height: 100vh; width: 100vw;
+            overflow: hidden; z-index: 1; display: none;
         }
         .active-section { display: block; }
-
-        /* BOOT */
+        
+        /* --- 1. BOOT SCREEN (BIOS STYLE) --- */
         #boot-layer {
-            background:#000;
-            color:#00ff41;
-            font-family:'Courier Prime', monospace;
-            display:flex;
-            flex-direction:column;
-            align-items:center;
-            justify-content:center;
-            text-align:center;
-            z-index:10000;
+            background-color: #000;
+            color: #00ff41;
+            font-family: 'Courier Prime', monospace;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; z-index: 10000;
         }
+        .bios-text { font-size: 14px; opacity: 0.7; margin-bottom: 40px; line-height: 1.5; }
+        .boot-title { font-size: 2.5rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; color: #00ff41; font-weight: bold; }
+        .boot-subtitle { font-size: 1rem; margin-bottom: 40px; color: #00ff41; opacity: 0.8; }
+        .boot-options { display: flex; gap: 30px; }
         .boot-btn {
-            background:transparent;
-            border:2px solid #00ff41;
-            color:#00ff41;
-            padding:15px 30px;
-            font-size:1.2rem;
-            cursor:pointer;
-            margin:10px;
+            background: transparent; border: 2px solid #00ff41; color: #00ff41;
+            padding: 15px 30px; font-family: 'JetBrains Mono', monospace; font-size: 1.2rem;
+            cursor: pointer; transition: 0.3s; text-transform: uppercase;
         }
+        .boot-btn:hover { background: #00ff41; color: #000; box-shadow: 0 0 20px #00ff41; }
 
-        /* CLI */
+        /* --- 2. CLI LAYER (TERMINAL) --- */
         #cli-layer {
-            background:#0a0a0a;
-            color:#00ff41;
-            font-family:'Courier Prime', monospace;
-            padding:20px;
-            overflow-y:auto;
+            background-color: #0a0a0a; color: #00ff41;
+            font-family: 'Courier Prime', monospace; padding: 20px; overflow-y: auto;
         }
-        .prompt { color:#d33682; font-weight:bold; }
-        .path { color:#2aa198; }
+        .term-line { margin: 5px 0; line-height: 1.5; font-size: 16px; }
+        .term-input-area { display: flex; align-items: center; margin-top: 10px; }
+        .prompt { color: #d33682; font-weight: bold; margin-right: 10px; }
+        .path { color: #2aa198; }
         #term-input {
-            background:none;
-            border:none;
-            color:#00ff41;
-            outline:none;
-            font-size:16px;
+            background: transparent; border: none; color: #00ff41;
+            font-family: 'Courier Prime', monospace; font-size: 16px; flex-grow: 1; outline: none; caret-color: #00ff41;
         }
 
-        /* GUI */
+        /* --- 3. GUI LAYER (YOUR DESIGN) --- */
+        /* Note: I scoped these styles to #gui-layer where possible to avoid conflicts */
         #gui-layer {
-            font-family:Inter, sans-serif;
-            background:#05070f;
-            color:#e5e7eb;
-            overflow-y:auto;
+            font-family: Inter, sans-serif;
+            background: radial-gradient(1000px 600px at 10% -10%, #0b1024, transparent), #05070f;
+            color: #e5e7eb; overflow-y: auto; overflow-x: hidden;
+            --bg:#05070f; --accent:#22d3ee; --accent2:#a78bfa;
+            --text:#e5e7eb; --muted:#9ca3af;
+            --glass:rgba(255,255,255,.07); --border:rgba(255,255,255,.12);
         }
-        canvas { position:fixed; inset:0; z-index:-1; }
 
+        /* Your Provided CSS */
+        #gui-layer canvas { position:fixed; inset:0; z-index:-1; pointer-events: none; }
+        
         #gate {
-            position:fixed;
-            inset:0;
-            background:radial-gradient(circle,#0b1024,#05070f);
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            flex-direction:column;
-            z-index:9999;
-            transition:1s;
+            position:fixed; inset:0; z-index:9999;
+            background:radial-gradient(circle at center,#0b1024,#05070f);
+            display:flex; align-items:center; justify-content:center; flex-direction:column;
+            transition:opacity 1.2s ease, visibility 1.2s ease
         }
         #gate.hidden { opacity:0; visibility:hidden; }
 
         .gate-btn {
-            margin-top:30px;
-            padding:18px 40px;
-            font-weight:700;
-            border:none;
-            border-radius:16px;
-            cursor:pointer;
+            margin-top:30px; padding:18px 40px; font-size:1rem; font-weight:700;
+            border-radius:16px; border:none; cursor:pointer; color: #fff;
             background:linear-gradient(135deg,#22d3ee,#a78bfa);
-            color:#fff;
+            box-shadow:0 0 40px rgba(34,211,238,.4)
         }
 
-        header {
-            position:fixed;
-            top:0;
-            width:100%;
-            backdrop-filter:blur(18px);
-            background:rgba(5,7,15,.6);
-            border-bottom:1px solid rgba(255,255,255,.12);
-        }
-        nav {
-            max-width:1200px;
-            margin:auto;
-            padding:18px 24px;
-            display:flex;
-            justify-content:space-between;
-        }
-        .logo {
-            font-weight:900;
-            background:linear-gradient(90deg,#22d3ee,#a78bfa);
-            -webkit-background-clip:text;
-            -webkit-text-fill-color:transparent;
-        }
+        /* GUI Header */
+        header { position:fixed; top:0; width:100%; z-index:100; backdrop-filter:blur(18px); background:rgba(5,7,15,.6); border-bottom:1px solid rgba(255,255,255,.12); }
+        nav { max-width:1200px; margin:auto; padding:18px 24px; display:flex; justify-content:space-between; align-items:center; }
+        .logo { font-weight:900; background:linear-gradient(90deg,#22d3ee,#a78bfa); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
         nav ul { list-style:none; display:flex; gap:26px; }
-        nav a { color:#9ca3af; text-decoration:none; }
+        nav a { color:#9ca3af; transition:.3s; text-decoration: none; }
+        nav a:hover { color:#e5e7eb; }
 
-        section {
-            max-width:1200px;
-            margin:auto;
-            padding:120px 24px;
-        }
-        .hero {
-            min-height:100vh;
-            display:grid;
-            grid-template-columns:1.2fr .8fr;
-            gap:50px;
-        }
-        .badge {
-            padding:8px 16px;
-            border-radius:999px;
-            background:rgba(34,211,238,.15);
-            color:#22d3ee;
-            display:inline-block;
-            margin-bottom:20px;
-        }
-        .gui-h1 {
-            font-size:3.6rem;
-            font-weight:900;
-        }
+        /* GUI Content */
+        section { max-width:1200px; margin:auto; padding:120px 24px; }
+        .hero { min-height:100vh; display:grid; grid-template-columns:1.2fr .8fr; align-items:center; gap:50px; }
+        .badge { display:inline-block; padding:8px 16px; border-radius:999px; background:rgba(34,211,238,.15); color:#22d3ee; font-size:.8rem; margin-bottom:20px; }
+        .gui-h1 { font-size:3.6rem; font-weight:900; line-height:1.05; margin:0; }
+        .hero p { margin-top:20px; color:#9ca3af; }
+        
+        .typing { font-family:"JetBrains Mono",monospace; color:#22d3ee; margin-top:20px; height:26px; }
 
-        .grid {
-            display:grid;
-            grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
-            gap:30px;
-        }
-        .card {
-            background:linear-gradient(180deg,rgba(255,255,255,.1),transparent);
-            border:1px solid rgba(255,255,255,.12);
-            border-radius:22px;
-            padding:32px;
-        }
+        .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:30px; }
+        .card { background:linear-gradient(180deg,rgba(255,255,255,.1),rgba(255,255,255,0)); border:1px solid rgba(255,255,255,.12); border-radius:22px; padding:32px; transition:.4s; position:relative; }
+        .card:hover { transform:translateY(-10px) scale(1.02); }
+        .card h3 { color:#22d3ee; margin-bottom:12px; }
+        .card p { color:#9ca3af; }
 
-        footer {
-            text-align:center;
-            padding:40px;
-            color:#9ca3af;
-        }
+        footer { text-align:center; padding:40px 24px; color:#9ca3af; border-top:1px solid rgba(255,255,255,.12); }
+        
+        /* Custom Cursor for GUI */
+        .cursor { position:fixed; width:26px; height:26px; border-radius:50%; pointer-events:none; background:radial-gradient(circle,#22d3ee,transparent 70%); mix-blend-mode:screen; z-index:9999; transition: transform 0.1s; }
 
+        @media(max-width:900px){ .hero{grid-template-columns:1fr} .gui-h1{font-size:2.6rem} }
+
+        /* REBOOT BUTTON (Global) */
         #reboot-btn {
-            position:fixed;
-            bottom:20px;
-            right:20px;
-            background:#000;
-            color:#fff;
-            border:1px solid #333;
-            padding:8px 12px;
-            cursor:pointer;
+            position: fixed; bottom: 20px; right: 20px; z-index: 100000;
+            background: rgba(0,0,0,0.6); border: 1px solid #333; color: #fff;
+            padding: 8px 12px; font-size: 10px; cursor: pointer;
         }
     </style>
 </head>
-
 <body>
 
-<div id="boot-layer" class="system-section active-section">
-    <div class="boot-title">SELECT INTERFACE MODE</div>
-    <button class="boot-btn" onclick="startSystem('CLI')">CLI MODE</button>
-    <button class="boot-btn" onclick="startSystem('GUI')">GUI MODE</button>
-</div>
-
-<div id="cli-layer" class="system-section">
-    <div>System initialized</div>
-    <div><span class="prompt">rohan@root:<span class="path">~</span>$</span>
-    <input id="term-input"></div>
-</div>
-
-<div id="gui-layer" class="system-section">
-<canvas id="bg"></canvas>
-
-<div id="gate">
-    <h1 class="gui-h1">Welcome to My Cyber World</h1>
-    <p>Explore systems, security & defense</p>
-    <button class="gate-btn" onclick="document.getElementById('gate').classList.add('hidden')">Enter My World</button>
-</div>
-
-<header>
-<nav>
-    <div class="logo">Rohan Patil</div>
-    <ul>
-        <li><a href="#about">About</a></li>
-        <li><a href="#skills">Skills</a></li>
-        <li><a href="#projects">Labs</a></li>
-        <li><a href="#education">Education</a></li>
-        <li><a href="#contact">Contact</a></li>
-    </ul>
-</nav>
-</header>
-
-<section id="about" class="hero">
-<div>
-    <div class="badge">CYBERSECURITY • INFRASTRUCTURE • DEFENSE</div>
-    <h1 class="gui-h1">Secure. Detect. Defend.</h1>
-    <p>Computer Science professional with diploma in IT Infrastructure & System Security.</p>
-</div>
-<div class="card">
-    <h3>Core Domains</h3>
-    <p>Networking • Cybersecurity • PKI • Forensics</p>
-</div>
-</section>
-
-<section id="skills">
-<h2>Skills Universe</h2>
-<div class="grid">
-    <div class="card"><h3>Networking</h3></div>
-    <div class="card"><h3>System Administration</h3></div>
-    <div class="card"><h3>Cybersecurity</h3></div>
-    <div class="card"><h3>Ethical Hacking</h3></div>
-</div>
-</section>
-
-<section id="projects">
-<h2>Hands-on Labs</h2>
-<div class="grid">
-    <div class="card"><h3>Firewall Hardening</h3></div>
-    <div class="card"><h3>PKI Lab</h3></div>
-    <div class="card"><h3>Forensics Case</h3></div>
-</div>
-</section>
-
-<section id="education">
-<h2>Education</h2>
-<div class="grid">
-    <div class="card"><h3>Computer Science</h3></div>
-    <div class="card"><h3>Diploma in IT Infrastructure & System Security</h3></div>
-</div>
-</section>
-
-<!-- 🔴 ONLY UPDATED PART -->
-<section id="contact">
-<h2>Connect</h2>
-<div class="grid">
-    <div class="card">
-        <h3>Email</h3>
-        <p>rohanspatil198@gmail.com</p>
+    <div id="boot-layer" class="system-section active-section">
+        <div class="bios-text">
+            BIOS DATE 01/21/26 11:22:33 VER 1.0.4<br>
+            CPU: QUANTUM CORE i9 - 128 CORES DETECTED<br>
+            RAM: 64TB OK<br>
+        </div>
+        <div class="boot-title">SELECT INTERFACE MODE</div>
+        <div class="boot-subtitle">Choose how you want to view the system.</div>
+        <div class="boot-options">
+            <button class="boot-btn" onclick="startSystem('CLI')">[ CLI_MODE ]</button>
+            <button class="boot-btn" onclick="startSystem('GUI')">[ GUI_MODE ]</button>
+        </div>
     </div>
-    <div class="card">
-        <h3>LinkedIn</h3>
-        <p>www.linkedin.com/in/rohan-patil-319a94238</p>
+
+    <div id="cli-layer" class="system-section">
+        <div class="term-line" style="white-space: pre; color: #2aa198; font-weight: bold; font-size: 10px; margin-bottom: 20px;">
+  _____       _                 
+ |  __ \     | |                
+ | |__) |___ | |__   __ _ _ __  
+ |  _  // _ \| '_ \ / _` | '_ \ 
+ | | \ \ (_) | | | | (_| | | | |
+ |_|  \_\___/|_| |_|\__,_|_| |_|
+        </div>
+        <div id="term-output">
+            <div class="term-line">System initialized.</div>
+            <div class="term-line">Logged in as: <span style="color:#fff">Rohan Patil</span></div>
+            <div class="term-line">Type <span style="color:#b58900">'help'</span> to see available commands.</div>
+        </div>
+        <div class="term-input-area">
+            <span class="prompt">rohan@root:<span class="path">~</span>$</span>
+            <input type="text" id="term-input" autocomplete="off" spellcheck="false">
+        </div>
     </div>
-    <div class="card">
-        <h3>GitHub</h3>
-        <p>github.com/RohanPatil198</p>
+
+    <div id="gui-layer" class="system-section">
+        <canvas id="bg"></canvas>
+        <div class="cursor" id="cursor"></div>
+
+        <div id="gate">
+            <h1 class="gui-h1">Welcome to My Cyber World</h1>
+            <p style="color:var(--muted);margin-top:12px">Explore systems, security & defense</p>
+            <button class="gate-btn" onclick="document.getElementById('gate').classList.add('hidden')">Enter My World</button>
+        </div>
+
+        <header>
+            <nav>
+                <div class="logo">Rohan Patil</div>
+                <ul>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#skills">Skills</a></li>
+                    <li><a href="#projects">Labs</a></li>
+                    <li><a href="#education">Education</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <section class="hero" id="about">
+            <div>
+                <div class="badge">CYBERSECURITY • INFRASTRUCTURE • DEFENSE</div>
+                <h1 class="gui-h1">Secure. Detect. Defend.</h1>
+                <p>Computer Science professional with a diploma in IT Infrastructure & System Security. I design, break, defend and audit systems.</p>
+                <div class="typing" id="typing"></div>
+            </div>
+            <div class="card">
+                <h3>My Core Domains</h3>
+                <p>Networking • System Administration • Cybersecurity • Ethical Hacking • Forensics • Compliance • PKI</p>
+            </div>
+        </section>
+
+        <section id="skills">
+            <h2>Skills Universe</h2>
+            <div class="grid">
+                <div class="card"><h3>Networking</h3><p>Firewalls, routing, switching, IDS/IPS</p></div>
+                <div class="card"><h3>System Administration</h3><p>Linux & Windows, hardening, monitoring</p></div>
+                <div class="card"><h3>Cybersecurity</h3><p>Threat modeling, vulnerability assessment</p></div>
+                <div class="card"><h3>Ethical Hacking</h3><p>Recon, exploitation, remediation</p></div>
+            </div>
+        </section>
+
+        <section id="projects">
+            <h2>Hands-on Labs</h2>
+            <div class="grid">
+                <div class="card"><h3>Firewall Hardening</h3><p>iptables rules, logging, attack mitigation</p></div>
+                <div class="card"><h3>PKI Lab</h3><p>Certificate authority, SSL/TLS trust chain</p></div>
+                <div class="card"><h3>Forensics Case</h3><p>Disk imaging, log analysis, incident report</p></div>
+            </div>
+        </section>
+
+        <section id="education">
+            <h2>Education</h2>
+            <div class="grid">
+                <div class="card"><h3>Computer Science</h3><p>OS, Networking, Security fundamentals</p></div>
+                <div class="card"><h3>Diploma in IT Infrastructure & System Security</h3><p>Security-first engineering mindset</p></div>
+            </div>
+        </section>
+
+        <section id="contact">
+            <h2>Connect</h2>
+            <div class="grid">
+                <div class="card"><h3>Email</h3><p>your.email@example.com</p></div>
+                <div class="card"><h3>LinkedIn</h3><p>linkedin.com/in/yourprofile</p></div>
+                <div class="card"><h3>GitHub</h3><p>github.com/yourusername</p></div>
+            </div>
+        </section>
+
+        <footer>© 2026 Rohan Patil — Security is a mindset</footer>
     </div>
-</div>
-</section>
 
-<footer>© 2026 Rohan Patil — Security is a mindset</footer>
-</div>
+    <button id="reboot-btn" onclick="location.reload()">↺ REBOOT</button>
 
-<button id="reboot-btn" onclick="location.reload()">↺ REBOOT</button>
+    <script>
+        /* --- SYSTEM CONTROL --- */
+        function startSystem(mode) {
+            document.getElementById('boot-layer').style.display = 'none';
+            
+            if (mode === 'CLI') {
+                document.getElementById('cli-layer').style.display = 'block';
+                document.getElementById('term-input').focus();
+            } else {
+                document.getElementById('gui-layer').style.display = 'block';
+                initGuiEffects();
+            }
+        }
 
-<script>
-function startSystem(mode){
-document.getElementById('boot-layer').style.display='none';
-if(mode==='CLI'){
-document.getElementById('cli-layer').style.display='block';
-}else{
-document.getElementById('gui-layer').style.display='block';
-}}
-</script>
+        /* --- CLI LOGIC --- */
+        const termInput = document.getElementById('term-input');
+        const termOutput = document.getElementById('term-output');
 
+        document.getElementById('cli-layer').addEventListener('click', () => termInput.focus());
+
+        termInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                const cmd = termInput.value.trim().toLowerCase();
+                const newLine = document.createElement('div');
+                newLine.className = 'term-line';
+                newLine.innerHTML = `<span class="prompt">rohan@root:<span class="path">~</span>$</span> ${cmd}`;
+                termOutput.appendChild(newLine);
+                
+                handleCommand(cmd);
+                termInput.value = '';
+                document.getElementById('cli-layer').scrollTop = document.getElementById('cli-layer').scrollHeight;
+            }
+        });
+
+        function print(text) {
+            const el = document.createElement('div');
+            el.className = 'term-line';
+            el.innerHTML = text;
+            termOutput.appendChild(el);
+        }
+
+        function handleCommand(cmd) {
+            switch(cmd) {
+                case 'help':
+                    print("AVAILABLE COMMANDS:");
+                    print("- <span style='color:#b58900'>whoami</span>");
+                    print("- <span style='color:#b58900'>ls</span> (view skills)");
+                    print("- <span style='color:#b58900'>gui</span> (switch mode)");
+                    print("- <span style='color:#b58900'>clear</span>");
+                    break;
+                case 'whoami':
+                    print("Rohan Patil - Cybersecurity Professional");
+                    print("Mission: Secure. Detect. Defend.");
+                    break;
+                case 'ls':
+                    print("drwx------ Networking");
+                    print("drwx------ System_Admin");
+                    print("-rwx------ Ethical_Hacking.sh");
+                    break;
+                case 'gui':
+                    startSystem('GUI');
+                    break;
+                case 'clear':
+                    termOutput.innerHTML = '';
+                    break;
+                default:
+                    print(`bash: ${cmd}: command not found`);
+            }
+        }
+
+        /* --- GUI LOGIC (Your Provided Scripts) --- */
+        function initGuiEffects() {
+            // Cursor
+            const cursor = document.getElementById('cursor');
+            window.addEventListener('mousemove', e => {
+                cursor.style.left = e.clientX + 'px';
+                cursor.style.top = e.clientY + 'px';
+            });
+
+            // Typing
+            const lines = ['> Initializing SOC...','> Scanning perimeter...','> Validating PKI...','> Systems secured'];
+            let i=0, j=0, el=document.getElementById('typing');
+            
+            // Avoid double interval if called twice
+            if(window.typeInterval) clearInterval(window.typeInterval);
+            
+            window.typeInterval = setInterval(() => {
+                if (j < lines[i].length) {
+                    el.textContent += lines[i][j++];
+                } else {
+                    setTimeout(() => {
+                        el.textContent = '';
+                        j = 0;
+                        i = (i + 1) % lines.length;
+                    }, 1000)
+                }
+            }, 80);
+
+            // Particles
+            const c = document.getElementById('bg'), ctx = c.getContext('2d');
+            let w, h;
+            function resize() { w = c.width = window.innerWidth; h = c.height = window.innerHeight; }
+            resize();
+            window.addEventListener('resize', resize);
+            
+            const pts = Array.from({length:80}, () => ({
+                x: Math.random() * w, y: Math.random() * h,
+                vx: (Math.random() - .5) * .4, vy: (Math.random() - .5) * .4
+            }));
+            
+            function anim() {
+                ctx.clearRect(0, 0, w, h);
+                pts.forEach(p => {
+                    p.x += p.vx; p.y += p.vy;
+                    if(p.x < 0 || p.x > w) p.vx *= -1;
+                    if(p.y < 0 || p.y > h) p.vy *= -1;
+                    ctx.fillStyle = 'rgba(34,211,238,.6)';
+                    ctx.fillRect(p.x, p.y, 2, 2);
+                });
+                if(document.getElementById('gui-layer').style.display === 'block') requestAnimationFrame(anim);
+            }
+            anim();
+        }
+    </script>
 </body>
 </html>
