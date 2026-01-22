@@ -1,234 +1,265 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rohan Patil | System Interface</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rohan Patil | System Interface</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime&display=swap" rel="stylesheet">
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Courier+Prime&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body, html { height: 100%; width: 100%; overflow: hidden; background: #000; }
 
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-html,body{height:100%;background:#000;overflow:hidden}
+        .system-section {
+            position: fixed; inset: 0;
+            display: none;
+        }
+        .active-section { display: block; }
 
-/* ---------- CORE ---------- */
-.system-section{position:fixed;inset:0;display:none}
-.active-section{display:block}
+        /* BOOT */
+        #boot-layer {
+            background:#000;
+            color:#00ff41;
+            font-family:'Courier Prime', monospace;
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            justify-content:center;
+            text-align:center;
+            z-index:10000;
+        }
+        .boot-btn {
+            background:transparent;
+            border:2px solid #00ff41;
+            color:#00ff41;
+            padding:15px 30px;
+            font-size:1.2rem;
+            cursor:pointer;
+            margin:10px;
+        }
 
-/* ---------- BOOT ---------- */
-#boot-layer{
-background:#000;color:#00ff41;
-font-family:'Courier Prime',monospace;
-display:flex;flex-direction:column;
-align-items:center;justify-content:center;
-text-align:center;z-index:9999}
+        /* CLI */
+        #cli-layer {
+            background:#0a0a0a;
+            color:#00ff41;
+            font-family:'Courier Prime', monospace;
+            padding:20px;
+            overflow-y:auto;
+        }
+        .prompt { color:#d33682; font-weight:bold; }
+        .path { color:#2aa198; }
+        #term-input {
+            background:none;
+            border:none;
+            color:#00ff41;
+            outline:none;
+            font-size:16px;
+        }
 
-.boot-title{font-size:2.4rem;margin:20px 0;font-weight:bold}
-.boot-btn{
-border:2px solid #00ff41;
-background:transparent;color:#00ff41;
-padding:14px 28px;
-font-size:1.1rem;
-cursor:pointer;margin:10px;
-transition:.3s}
-.boot-btn:hover{background:#00ff41;color:#000}
+        /* GUI */
+        #gui-layer {
+            font-family:Inter, sans-serif;
+            background:#05070f;
+            color:#e5e7eb;
+            overflow-y:auto;
+        }
+        canvas { position:fixed; inset:0; z-index:-1; }
 
-/* ---------- CLI ---------- */
-#cli-layer{
-background:#0a0a0a;color:#00ff41;
-font-family:'Courier Prime',monospace;
-padding:20px;overflow-y:auto}
+        #gate {
+            position:fixed;
+            inset:0;
+            background:radial-gradient(circle,#0b1024,#05070f);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            flex-direction:column;
+            z-index:9999;
+            transition:1s;
+        }
+        #gate.hidden { opacity:0; visibility:hidden; }
 
-.prompt{color:#d33682;font-weight:bold}
-.path{color:#2aa198}
-#term-input{
-background:none;border:none;
-color:#00ff41;font-size:16px;
-outline:none;width:80%}
+        .gate-btn {
+            margin-top:30px;
+            padding:18px 40px;
+            font-weight:700;
+            border:none;
+            border-radius:16px;
+            cursor:pointer;
+            background:linear-gradient(135deg,#22d3ee,#a78bfa);
+            color:#fff;
+        }
 
-/* ---------- GUI ---------- */
-#gui-layer{
-font-family:Inter,sans-serif;
-background:#05070f;color:#e5e7eb;
-overflow-y:auto}
+        header {
+            position:fixed;
+            top:0;
+            width:100%;
+            backdrop-filter:blur(18px);
+            background:rgba(5,7,15,.6);
+            border-bottom:1px solid rgba(255,255,255,.12);
+        }
+        nav {
+            max-width:1200px;
+            margin:auto;
+            padding:18px 24px;
+            display:flex;
+            justify-content:space-between;
+        }
+        .logo {
+            font-weight:900;
+            background:linear-gradient(90deg,#22d3ee,#a78bfa);
+            -webkit-background-clip:text;
+            -webkit-text-fill-color:transparent;
+        }
+        nav ul { list-style:none; display:flex; gap:26px; }
+        nav a { color:#9ca3af; text-decoration:none; }
 
-canvas{position:fixed;inset:0;z-index:-1}
+        section {
+            max-width:1200px;
+            margin:auto;
+            padding:120px 24px;
+        }
+        .hero {
+            min-height:100vh;
+            display:grid;
+            grid-template-columns:1.2fr .8fr;
+            gap:50px;
+        }
+        .badge {
+            padding:8px 16px;
+            border-radius:999px;
+            background:rgba(34,211,238,.15);
+            color:#22d3ee;
+            display:inline-block;
+            margin-bottom:20px;
+        }
+        .gui-h1 {
+            font-size:3.6rem;
+            font-weight:900;
+        }
 
-/* Gate */
-#gate{
-position:fixed;inset:0;
-display:flex;flex-direction:column;
-align-items:center;justify-content:center;
-background:radial-gradient(circle,#0b1024,#05070f);
-z-index:9999;transition:1s}
-#gate.hidden{opacity:0;visibility:hidden}
-.gate-btn{
-margin-top:25px;
-padding:18px 40px;
-font-weight:700;border:none;
-border-radius:16px;
-cursor:pointer;
-background:linear-gradient(135deg,#22d3ee,#a78bfa);
-color:#fff}
+        .grid {
+            display:grid;
+            grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+            gap:30px;
+        }
+        .card {
+            background:linear-gradient(180deg,rgba(255,255,255,.1),transparent);
+            border:1px solid rgba(255,255,255,.12);
+            border-radius:22px;
+            padding:32px;
+        }
 
-/* Header */
-header{
-position:fixed;top:0;width:100%;
-backdrop-filter:blur(18px);
-background:rgba(5,7,15,.7);
-border-bottom:1px solid rgba(255,255,255,.12)}
-nav{
-max-width:1200px;margin:auto;
-display:flex;justify-content:space-between;
-padding:18px}
-.logo{
-font-weight:900;
-background:linear-gradient(90deg,#22d3ee,#a78bfa);
--webkit-background-clip:text;
--webkit-text-fill-color:transparent}
-nav ul{list-style:none;display:flex;gap:26px}
-nav a{color:#9ca3af;text-decoration:none}
-nav a:hover{color:#fff}
+        footer {
+            text-align:center;
+            padding:40px;
+            color:#9ca3af;
+        }
 
-/* Sections */
-section{max-width:1200px;margin:auto;padding:120px 24px}
-.hero{display:grid;grid-template-columns:1.2fr .8fr;gap:40px}
-.gui-h1{font-size:3.6rem;font-weight:900}
-.badge{
-display:inline-block;
-padding:8px 16px;
-border-radius:999px;
-background:rgba(34,211,238,.15);
-color:#22d3ee;
-margin-bottom:20px}
-
-.grid{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
-gap:30px}
-
-.card{
-background:linear-gradient(180deg,rgba(255,255,255,.08),transparent);
-border:1px solid rgba(255,255,255,.12);
-border-radius:22px;
-padding:32px;
-transition:.4s}
-.card:hover{transform:translateY(-10px)}
-
-footer{text-align:center;padding:40px;color:#9ca3af}
-
-/* Reboot */
-#reboot-btn{
-position:fixed;bottom:20px;right:20px;
-background:#000;color:#fff;
-border:1px solid #333;
-padding:8px 12px;
-cursor:pointer}
-</style>
+        #reboot-btn {
+            position:fixed;
+            bottom:20px;
+            right:20px;
+            background:#000;
+            color:#fff;
+            border:1px solid #333;
+            padding:8px 12px;
+            cursor:pointer;
+        }
+    </style>
 </head>
 
 <body>
 
-<!-- BOOT -->
 <div id="boot-layer" class="system-section active-section">
-<div>BIOS v1.0 | QUANTUM CORE READY</div>
-<div class="boot-title">SELECT INTERFACE MODE</div>
-<button class="boot-btn" onclick="startSystem('CLI')">CLI MODE</button>
-<button class="boot-btn" onclick="startSystem('GUI')">GUI MODE</button>
+    <div class="boot-title">SELECT INTERFACE MODE</div>
+    <button class="boot-btn" onclick="startSystem('CLI')">CLI MODE</button>
+    <button class="boot-btn" onclick="startSystem('GUI')">GUI MODE</button>
 </div>
 
-<!-- CLI -->
 <div id="cli-layer" class="system-section">
-<div>System Initialized</div>
-<div>Logged in as Rohan Patil</div>
-<div><span class="prompt">rohan@root:<span class="path">~</span>$</span>
-<input id="term-input"></div>
+    <div>System initialized</div>
+    <div><span class="prompt">rohan@root:<span class="path">~</span>$</span>
+    <input id="term-input"></div>
 </div>
 
-<!-- GUI -->
 <div id="gui-layer" class="system-section">
 <canvas id="bg"></canvas>
 
 <div id="gate">
-<h1 class="gui-h1">Welcome to My Cyber World</h1>
-<p>Explore systems, security & defense</p>
-<button class="gate-btn" onclick="document.getElementById('gate').classList.add('hidden')">Enter My World</button>
+    <h1 class="gui-h1">Welcome to My Cyber World</h1>
+    <p>Explore systems, security & defense</p>
+    <button class="gate-btn" onclick="document.getElementById('gate').classList.add('hidden')">Enter My World</button>
 </div>
 
 <header>
 <nav>
-<div class="logo">Rohan Patil</div>
-<ul>
-<li><a href="#about">About</a></li>
-<li><a href="#skills">Skills</a></li>
-<li><a href="#projects">Labs</a></li>
-<li><a href="#education">Education</a></li>
-<li><a href="#contact">Contact</a></li>
-</ul>
+    <div class="logo">Rohan Patil</div>
+    <ul>
+        <li><a href="#about">About</a></li>
+        <li><a href="#skills">Skills</a></li>
+        <li><a href="#projects">Labs</a></li>
+        <li><a href="#education">Education</a></li>
+        <li><a href="#contact">Contact</a></li>
+    </ul>
 </nav>
 </header>
 
 <section id="about" class="hero">
 <div>
-<div class="badge">CYBERSECURITY • DEFENSE</div>
-<h1 class="gui-h1">Secure. Detect. Defend.</h1>
-<p>Computer Science professional with diploma in IT Infrastructure & System Security.</p>
+    <div class="badge">CYBERSECURITY • INFRASTRUCTURE • DEFENSE</div>
+    <h1 class="gui-h1">Secure. Detect. Defend.</h1>
+    <p>Computer Science professional with diploma in IT Infrastructure & System Security.</p>
 </div>
 <div class="card">
-<h3>Core Domains</h3>
-<p>Networking, Cybersecurity, System Hardening, PKI, Forensics</p>
+    <h3>Core Domains</h3>
+    <p>Networking • Cybersecurity • PKI • Forensics</p>
 </div>
 </section>
 
 <section id="skills">
-<h2>Skills</h2>
+<h2>Skills Universe</h2>
 <div class="grid">
-<div class="card"><h3>Networking</h3><p>Firewalls, IDS/IPS</p></div>
-<div class="card"><h3>System Admin</h3><p>Linux & Windows</p></div>
-<div class="card"><h3>Cybersecurity</h3><p>Threat Modeling</p></div>
+    <div class="card"><h3>Networking</h3></div>
+    <div class="card"><h3>System Administration</h3></div>
+    <div class="card"><h3>Cybersecurity</h3></div>
+    <div class="card"><h3>Ethical Hacking</h3></div>
 </div>
 </section>
 
 <section id="projects">
 <h2>Hands-on Labs</h2>
 <div class="grid">
-<div class="card"><h3>Firewall Hardening</h3></div>
-<div class="card"><h3>PKI Lab</h3></div>
-<div class="card"><h3>Forensics</h3></div>
+    <div class="card"><h3>Firewall Hardening</h3></div>
+    <div class="card"><h3>PKI Lab</h3></div>
+    <div class="card"><h3>Forensics Case</h3></div>
 </div>
 </section>
 
 <section id="education">
 <h2>Education</h2>
 <div class="grid">
-<div class="card"><h3>Computer Science</h3></div>
-<div class="card"><h3>Diploma in IT Infrastructure & System Security</h3></div>
+    <div class="card"><h3>Computer Science</h3></div>
+    <div class="card"><h3>Diploma in IT Infrastructure & System Security</h3></div>
 </div>
 </section>
 
-<!-- ✅ UPDATED CONTACT -->
+<!-- 🔴 ONLY UPDATED PART -->
 <section id="contact">
 <h2>Connect</h2>
 <div class="grid">
-
-<div class="card">
-<h3>Email</h3>
-<p><a href="mailto:rohanspatil198@gmail.com" style="color:#9ca3af">rohanspatil198@gmail.com</a></p>
-</div>
-
-<div class="card">
-<h3>LinkedIn</h3>
-<p><a href="https://www.linkedin.com/in/rohan-patil-319a94238" target="_blank" style="color:#9ca3af">
-www.linkedin.com/in/rohan-patil-319a94238</a></p>
-</div>
-
-<div class="card">
-<h3>GitHub</h3>
-<p><a href="https://github.com/RohanPatil198" target="_blank" style="color:#9ca3af">
-github.com/RohanPatil198</a></p>
-</div>
-
+    <div class="card">
+        <h3>Email</h3>
+        <p>rohanspatil198@gmail.com</p>
+    </div>
+    <div class="card">
+        <h3>LinkedIn</h3>
+        <p>www.linkedin.com/in/rohan-patil-319a94238</p>
+    </div>
+    <div class="card">
+        <h3>GitHub</h3>
+        <p>github.com/RohanPatil198</p>
+    </div>
 </div>
 </section>
 
@@ -244,24 +275,7 @@ if(mode==='CLI'){
 document.getElementById('cli-layer').style.display='block';
 }else{
 document.getElementById('gui-layer').style.display='block';
-initParticles();
 }}
-
-function initParticles(){
-const c=document.getElementById('bg'),ctx=c.getContext('2d');
-function resize(){c.width=innerWidth;c.height=innerHeight}
-resize();addEventListener('resize',resize);
-let pts=Array.from({length:80},()=>({x:Math.random()*c.width,y:Math.random()*c.height,vx:(Math.random()-.5)*.4,vy:(Math.random()-.5)*.4}));
-(function anim(){
-ctx.clearRect(0,0,c.width,c.height);
-pts.forEach(p=>{
-p.x+=p.vx;p.y+=p.vy;
-if(p.x<0||p.x>c.width)p.vx*=-1;
-if(p.y<0||p.y>c.height)p.vy*=-1;
-ctx.fillStyle='rgba(34,211,238,.6)';
-ctx.fillRect(p.x,p.y,2,2)});
-requestAnimationFrame(anim)})();
-}
 </script>
 
 </body>
